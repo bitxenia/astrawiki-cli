@@ -8,7 +8,7 @@ import { FsBlockstore } from "blockstore-fs";
 import { FsDatastore } from "datastore-fs";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
-import { getTmpConfig } from "./config.js";
+import { getTmpConfig } from "../utils/config.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

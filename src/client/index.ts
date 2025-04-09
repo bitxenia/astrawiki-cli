@@ -6,14 +6,14 @@ import { program } from "commander";
 import { spawn } from "child_process";
 import { fileURLToPath } from "url";
 import axios, { HttpStatusCode } from "axios";
-import { generateConfig } from "./config.js";
+import { generateConfig } from "../utils/config.js";
 import { printLog } from "./logs.js";
 import { getContent } from "./content.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const SERVER_FILE = path.resolve(__dirname, "server.js");
+const SERVER_FILE = path.resolve(__dirname, "../server/index.js");
 const SERVER_ADDRESS = "http://localhost:31337";
 
 const TMP_DIR = "/tmp/astrawiki-cli";
@@ -53,7 +53,7 @@ program
 
     if (opts.foreground) {
       fs.writeFileSync(PID_FILE, "");
-      await import("./server.js");
+      await import("../server/index.js");
     } else {
     }
     const child = spawn(process.execPath, [SERVER_FILE], {

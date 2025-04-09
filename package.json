@@ -8,7 +8,7 @@
     "clean": "rm -rf data orbitdb"
   },
   "bin": {
-    "astrawiki": "./dist/index.js"
+    "astrawiki": "./dist/client/index.js"
   },
   "type": "module",
   "keywords": [],
