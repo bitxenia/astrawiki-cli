@@ -102,6 +102,27 @@ program
   });
 
 program
+  .command("add")
+  .description("Add an article to the wiki")
+  .argument("<name>", "Name of the article to add")
+  .argument("<file>", "Content of the article")
+  .action(async (name: string, file: string) => {
+    const content = fs.readFileSync(file, "utf-8");
+    await axios.post(SERVER_ADDRESS + "/articles", { name, content });
+  });
+
+program
+  .command("get")
+  .description("Get an article")
+  .argument("<name>", "Name of the article to get")
+  .action(async (name: string) => {
+    const { data } = await axios.get<{ name: string; content: string }>(
+      SERVER_ADDRESS + `/articles/${name}`,
+    );
+    console.log(data.content);
+  });
+
+program
   .command("logs")
   .description("Astrawiki server logs")
   .option("-e --errors", "Show the error logs")

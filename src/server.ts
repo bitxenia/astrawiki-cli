@@ -40,6 +40,7 @@ async function startService() {
   };
 
   node = await createAstrawikiNode(opts);
+  app.use(express.json());
 
   app.get("/articles", async (req, res) => {
     if (!node) {
@@ -48,6 +49,29 @@ async function startService() {
         .json({ message: "Server not running. Run astrawiki start" });
     } else {
       res.json({ articles: await node.getArticleList() });
+    }
+  });
+
+  app.get("/articles/:name", async (req, res) => {
+    if (!node) {
+      res
+        .status(400)
+        .json({ message: "Server not running. Run astrawiki start" });
+    } else {
+      const response = await node.getArticle(req.params.name);
+      res.json({ name: response.name, content: response.content });
+    }
+  });
+
+  app.post("/articles/", async (req, res) => {
+    if (!node) {
+      res
+        .status(400)
+        .json({ message: "Server not running. Run astrawiki start" });
+    } else {
+      const { name, content } = req.body;
+      await node.newArticle(name, content);
+      res.status(201).json({ message: "Article created" });
     }
   });
 

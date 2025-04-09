@@ -70,6 +70,23 @@ astrawiki start
 This command starts the service and connects to the network with other
 astrawiki nodes. See `--help` for more information about the flags.
 
+#### Add an article
+
+```sh
+astrawiki add <name> <file>
+```
+
+Adds an article to the wiki given the name of the article, and its content in
+the form of a file.
+
+#### Get an article
+
+```sh
+astrawiki get <name>
+```
+
+Gets an article from the wiki if it exists.
+
 #### List all articles
 
 ```sh
@@ -113,8 +130,6 @@ To work on this you must clone the repository, and run it.
 ## Limitations
 
 - It doesn't support astrawiki-eth.
-- Doesn't implement all the features astrawki can bring, like adding, viewing,
-  and deleting articles.
 
 ## Contributing
 
@@ -123,4 +138,3 @@ Feel free to contribute by adding PRs, commenting, or creating issues.
 ## License
 
 MIT (LICENSE-MIT / http://opensource.org/licenses/MIT)
-
