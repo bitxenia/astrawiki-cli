@@ -32,8 +32,6 @@ async function startService() {
   const opts: AstrawikiNodeInit = {
     blockstore: new FsBlockstore(BLOCKSTORE_DIR),
     datastore: new FsDatastore(DATASTORE_DIR),
-    // TODO: Add config file to set these two parameters (maybe containerized
-    // version might break because of the public IP parameter?)
     isCollaborator: config.isCollaborator,
     publicIP: config.publicIp,
     wikiName: config.wikiName,
