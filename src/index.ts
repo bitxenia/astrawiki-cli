@@ -7,6 +7,7 @@ import { spawn } from "child_process";
 import { fileURLToPath } from "url";
 import axios from "axios";
 import { generateConfig } from "./config.js";
+import { printLog } from "./logs.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -103,25 +104,11 @@ program
 program
   .command("logs")
   .description("Astrawiki server logs")
-  .action(() => {
-    if (!fs.existsSync(LOG_PATH)) {
-      console.log("No log file found.");
-      return;
-    }
-    const logContent = fs.readFileSync(LOG_PATH, "utf-8");
-    console.log(logContent);
-  });
-
-program
-  .command("errors")
-  .description("Astrawiki server errors")
-  .action(() => {
-    if (!fs.existsSync(ERROR_PATH)) {
-      console.log("No error file found.");
-      return;
-    }
-    const errorContent = fs.readFileSync(ERROR_PATH, "utf-8");
-    console.log(errorContent);
+  .option("-e --errors", "Show the error logs")
+  .option("-f --follow", "Follow the logs")
+  .action((opts) => {
+    const logFile = opts.errors ? ERROR_PATH : LOG_PATH;
+    printLog(logFile, opts.follow ? true : false);
   });
 
 program
