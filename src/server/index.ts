@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import {
   createAstrawikiNode,
   AstrawikiNode,
@@ -9,6 +9,7 @@ import { FsDatastore } from "datastore-fs";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
 import { getTmpConfig } from "../utils/config.js";
+import { HttpStatusCode } from "axios";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -40,37 +41,29 @@ async function startService() {
   node = await createAstrawikiNode(opts);
   app.use(express.json());
 
-  app.get("/articles", async (req, res) => {
+  app.use((_req: Request, res: Response, next: NextFunction): void => {
     if (!node) {
       res
-        .status(400)
-        .json({ message: "Server not running. Run astrawiki start" });
+        .status(HttpStatusCode.ServiceUnavailable)
+        .json({ message: "Server not ready." });
     } else {
-      res.json({ articles: await node.getArticleList() });
+      next();
     }
+  });
+
+  app.get("/articles", async (req, res) => {
+    res.json({ articles: await node.getArticleList() });
   });
 
   app.get("/articles/:name", async (req, res) => {
-    if (!node) {
-      res
-        .status(400)
-        .json({ message: "Server not running. Run astrawiki start" });
-    } else {
-      const response = await node.getArticle(req.params.name);
-      res.json({ name: response.name, content: response.content });
-    }
+    const response = await node.getArticle(req.params.name);
+    res.json({ name: response.name, content: response.content });
   });
 
   app.post("/articles/", async (req, res) => {
-    if (!node) {
-      res
-        .status(400)
-        .json({ message: "Server not running. Run astrawiki start" });
-    } else {
-      const { name, content } = req.body;
-      await node.newArticle(name, content);
-      res.status(201).json({ message: "Article created" });
-    }
+    const { name, content } = req.body;
+    await node.newArticle(name, content);
+    res.status(HttpStatusCode.Created).json({ message: "Article created" });
   });
 
   app.get("/", (req, res) => {
