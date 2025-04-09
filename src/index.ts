@@ -5,9 +5,10 @@ import fs from "fs";
 import { program } from "commander";
 import { spawn } from "child_process";
 import { fileURLToPath } from "url";
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { generateConfig } from "./config.js";
 import { printLog } from "./logs.js";
+import { getContent } from "./content.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -105,10 +106,18 @@ program
   .command("add")
   .description("Add an article to the wiki")
   .argument("<name>", "Name of the article to add")
-  .argument("<file>", "Content of the article")
-  .action(async (name: string, file: string) => {
-    const content = fs.readFileSync(file, "utf-8");
-    await axios.post(SERVER_ADDRESS + "/articles", { name, content });
+  .argument("[file]", "File containing article content")
+  .action(async (name: string, file?: string) => {
+    const content = await getContent(file);
+    let { status } = await axios.post(SERVER_ADDRESS + "/articles", {
+      name,
+      content,
+    });
+    if (status !== HttpStatusCode.Created) {
+      console.log("Failed to create file");
+    } else {
+      console.log(`Article ${name} created`);
+    }
   });
 
 program
