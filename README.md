@@ -90,7 +90,7 @@ It's accesed by `http://localhost:31337`, and supports the following endpoints:
 
 To work on this you must clone the repository, and run it.
 
- ##Limitations
+ ## Limitations
 
  - It doesn't support astrawiki-eth.
  - Doesn't implement all the features astrawki can bring, like adding, viewing, and deleting articles.
@@ -100,3 +100,5 @@ To work on this you must clone the repository, and run it.
 Feel free to contribute by adding PRs, commenting or creating issues, and reaching out to us.
 
  ## License
+
+MIT (LICENSE-MIT / http://opensource.org/licenses/MIT)
