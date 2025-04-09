@@ -6,6 +6,7 @@ import { program } from "commander";
 import { spawn } from "child_process";
 import { fileURLToPath } from "url";
 import axios from "axios";
+import { generateConfig } from "./config.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -28,6 +29,10 @@ program
   .command("start")
   .description("Start the astrawiki node in the background")
   .option("--foreground", "Run server in the foreground")
+  .option("-c --collaborator", "Pin all the wiki's articles")
+  .option("--ip <address>", "Set your public IP")
+  .option("-n --name <name>", "Specify the wiki's name to connect to")
+  .option("-C --config <path>", "Path of the config to load")
   .action(async (opts) => {
     if (fs.existsSync(PID_FILE)) {
       console.log("Astrawiki is already running.");
@@ -35,6 +40,14 @@ program
     }
 
     console.log("Starting Astrawiki service...");
+    generateConfig(
+      {
+        wikiName: opts.name,
+        isCollaborator: opts.collaborator,
+        publicIp: opts.ip,
+      },
+      opts.config,
+    );
 
     if (opts.foreground) {
       fs.writeFileSync(PID_FILE, "");
@@ -73,6 +86,7 @@ program
       console.log(`Astrawiki stopped (PID: ${pid})`);
     } catch (err) {
       console.error("Failed to stop Astrawiki:", err);
+      fs.unlinkSync(PID_FILE);
     }
   });
 
