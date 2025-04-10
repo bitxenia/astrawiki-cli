@@ -48,7 +48,7 @@ program
     );
 
     await startServer(opts.foreground);
-    spinner.succeed(`${chalk.bold("Astrawiki")} service started`);
+    spinner.succeed(`    ${chalk.bold("Astrawiki")} service started`);
   });
 
 program
@@ -77,12 +77,13 @@ program
   .argument("<name>", "Name of the article to add")
   .argument("[file]", "File containing article content")
   .action(async (name: string, file?: string) => {
-    const content = file ? await getContent(file) : await editContent();
     try {
+      const content = file ? await getContent(file) : await editContent();
       await addArticle(name, content);
       log.success(`${chalk.yellow.bold(name)} added`);
-    } catch {
-      log.error("Failed to add article");
+    } catch (err) {
+      if (err instanceof Error) log.error(err.message);
+      else log.error("Unknown error");
     }
   });
 
@@ -92,13 +93,16 @@ program
   .argument("<name>", "Name of the article to edit")
   .argument("[file]", "File containing updated article content")
   .action(async (name: string, file?: string) => {
-    const { content } = await getArticle(name);
-    let newContent = file ? await getContent(file) : await editContent(content);
     try {
+      const { content } = await getArticle(name);
+      let newContent = file
+        ? await getContent(file)
+        : await editContent(content);
       await editArticle(name, newContent);
-      log.success(`"${chalk.yellow.bold(name)}" edited`);
-    } catch {
-      log.error("Failed to edit file");
+      log.success(`${chalk.yellow.bold(name)} edited`);
+    } catch (err) {
+      if (err instanceof Error) log.error(err.message);
+      else log.error("Unknown error");
     }
   });
 
@@ -107,8 +111,13 @@ program
   .description("Get an article")
   .argument("<name>", "Name of the article to get")
   .action(async (name: string) => {
-    const { content } = await getArticle(name);
-    console.log(content);
+    try {
+      const { content } = await getArticle(name);
+      console.log(content);
+    } catch (err) {
+      if (err instanceof Error) log.error(err.message);
+      else log.error("Unknown error");
+    }
   });
 
 program
