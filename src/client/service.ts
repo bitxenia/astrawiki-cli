@@ -30,7 +30,6 @@ export async function startServer(foreground: boolean) {
 
   const ready = await waitForServer();
   if (ready) {
-    console.log(`Astrawiki started in the background (PID: ${child.pid})`);
     fs.writeFileSync(PID_FILE, String(child.pid));
   } else {
     console.log("Timed out waiting for service to start");
@@ -40,13 +39,10 @@ export async function startServer(foreground: boolean) {
 
 export async function stopService(): Promise<void> {
   const pid = parseInt(await readFile(PID_FILE, "utf-8"));
+  await unlink(PID_FILE);
   try {
     process.kill(pid);
-    console.log(`Astrawiki stopped (PID: ${pid})`);
-  } catch (err) {
-    console.error("Failed to stop Astrawiki:", err);
-  }
-  await unlink(PID_FILE);
+  } catch (err) {}
 }
 
 export async function isServiceUp(): Promise<boolean> {

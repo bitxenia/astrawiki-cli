@@ -13,6 +13,9 @@ import {
 } from "./api.js";
 import { isServiceUp, startServer, stopService } from "./service.js";
 import { ERROR_PATH, LOG_PATH } from "../utils/constants.js";
+import chalk from "chalk";
+import { log } from "../utils/logger.js";
+import ora from "ora";
 
 program.name("astrawiki").description("Astrawiki node").version("0.0.1");
 
@@ -26,11 +29,15 @@ program
   .option("-C --config <path>", "Path of the config to load")
   .action(async (opts) => {
     if (await isServiceUp()) {
-      console.log("Astrawiki is already running.");
+      log.info(`${chalk.bold("Astrawiki")} service is already running`);
       process.exit(1);
     }
 
-    console.log("Starting Astrawiki service...");
+    const spinner = ora({
+      text: `    Starting ${chalk.bold("Astrawiki")} service`,
+      color: "yellow",
+      spinner: "sand",
+    }).start();
     await generateConfig(
       {
         wikiName: opts.name,
@@ -41,6 +48,7 @@ program
     );
 
     await startServer(opts.foreground);
+    spinner.succeed(`${chalk.bold("Astrawiki")} service started`);
   });
 
 program
@@ -48,10 +56,11 @@ program
   .description("Stop the astrawiki node")
   .action(async () => {
     if (!(await isServiceUp())) {
-      console.log("Astrawiki is not running.");
+      log.info("Astrawiki service is not running.");
       return;
     }
     await stopService();
+    log.success(`${chalk.bold("Astrawiki")} service stopped`);
   });
 
 program
@@ -71,9 +80,9 @@ program
     const content = file ? await getContent(file) : await editContent();
     try {
       await addArticle(name, content);
-      console.log(`Article ${name} added`);
+      log.success(`${chalk.yellow.bold(name)} added`);
     } catch {
-      console.log("Failed to add article");
+      log.error("Failed to add article");
     }
   });
 
@@ -87,9 +96,9 @@ program
     let newContent = file ? await getContent(file) : await editContent(content);
     try {
       await editArticle(name, newContent);
-      console.log(`Article ${name} edited`);
+      log.success(`"${chalk.yellow.bold(name)}" edited`);
     } catch {
-      console.log("Failed to edit file");
+      log.error("Failed to edit file");
     }
   });
 
@@ -117,10 +126,10 @@ program
   .description("Display the Astrawiki service status")
   .action(async () => {
     if (await isServerRunning()) {
-      console.log("Astrawiki service is running");
+      log.info(`${chalk.bold("Astrawiki")} service is running`);
     } else {
-      console.log(
-        "Astrawiki service isn't running, check the errors using astrawiki logs -e",
+      log.error(
+        `Astrawiki service is not running, check the errors using ${chalk.green("astrawiki logs -e")}`,
       );
     }
   });
