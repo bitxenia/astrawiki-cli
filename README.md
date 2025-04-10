@@ -47,14 +47,17 @@ And then run `astrawiki -V` to check the installation was successful.
 ### Docker
 
 For this version, you'll need both Docker and Docker Compose installed. To run
-the container, clone the repo and run:
+the container, run:
 
 ```sh
+git clone git@github.com:bitxenia/astrawiki-cli.git
+cd astrawiki-cli
 mkdir config
+cp ./config.example.json ./config/config.json
 ```
 
-Then inside the config directory, you can place a config.json file for the
-Docker container to run. After that, run:
+Then open the `config/config.json` file and add your public IP to the file.
+After that, you can run:
 
 ```sh
 docker compose up
@@ -143,12 +146,41 @@ Also, you can follow the logs with the `-f` flag. This acts like `tail -f`.
 
 ### Container
 
-Running commands using the containerized version can be done with `docker
-exec`. Simply prepend any command found in the command-line interface with
-`docker exec astrawiki`.
-
 Note that the `file` argument in both `add` and `edit` commands are mandatory,
 since there's no TTY in the container or editor installed.
+
+#### Add an article
+
+```sh
+cat ./some-file.txt | docker exec -i astrawiki astrawiki add "An article" -
+```
+
+This has to be done through `stdin`, because passing a path or editing in-place
+is unsupported.
+
+#### Get an article
+
+```sh
+docker exec -i astrawiki astrawiki get "An article"
+```
+
+#### List all articles
+
+```sh
+docker exec -i astrawiki astrawiki list
+```
+
+### View logs
+
+```sh
+docker exec -i astrawiki astrawiki logs
+```
+
+Or, to view errors:
+
+```sh
+docker exec -i astrawiki astrawiki logs -e
+```
 
 ### HTTP API
 
