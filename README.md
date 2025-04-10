@@ -1,9 +1,8 @@
 # Astrawiki CLI
 
-This is a command-line interface to interact and manage an astrawiki-ipfs node.
-It runs a background service that can be used to help pin a given wiki's
-articles. But it can also act as a frontend for fetching, updating, and
-creating articles in a wiki.
+This is a command-line interface to manage an astrawiki node. It runs a
+background service to help pin articles and offers tools for creating,
+updating, and reading wiki content — either locally or via Docker.
 
 ## Motivation
 
@@ -43,7 +42,9 @@ To install it locally, run:
 npm install -g @bitxenia/astrawiki-cli
 ```
 
-## Docker
+And then run `astrawiki -V` to check the installation was successful.
+
+### Docker
 
 For this version, you'll need both Docker and Docker Compose installed. To run
 the container, clone the repo and run:
@@ -59,10 +60,30 @@ Docker container to run. After that, run:
 docker compose up
 ```
 
-Similarly, whenener you want to stop the container, you can run:
+Similarly, to stop the container, you can run:
 
 ```sh
 docker compose down
+```
+
+### Ports
+
+For the tool to work as intended, it's necessary to open the ports `4001`,
+`4002` and `4003` to your machine. This is the same for containers and local
+installs, and enables the IPFS node to communicate with other peers.
+
+## Quick start
+
+```sh
+npm install -g @bitxenia/astrawiki-cli
+# Starts your wiki given the name an your public IP
+astrawiki start --wikiName "my-wiki" --ip "<your-ip>"
+
+# Adds an article to the wiki
+astrawiki add "An article" "/path/to/your/article/content"
+
+# Print the article content
+astrawiki get "An article"
 ```
 
 ## Usage
@@ -72,20 +93,22 @@ docker compose down
 #### Start the service
 
 ```sh
-astrawiki start
+astrawiki start [flags]
 ```
 
 This command starts the service and connects to the network with other
-astrawiki nodes. See `--help` for more information about the flags.
+astrawiki nodes.
 
 #### Add an article
 
 ```sh
-astrawiki add <name> <file>
+astrawiki add <name> [file]
 ```
 
-Adds an article to the wiki given the name of the article, and its content in
-the form of a file.
+Adds an article to the wiki given the name of the article. The `file` argument
+lets the user choose a file to be the article's content. If `file` isn't
+present, the tool lets the user write the content of the article from within an
+editor. The editor of choice depends on the `$EDITOR` variable.
 
 #### Get an article
 
@@ -93,7 +116,7 @@ the form of a file.
 astrawiki get <name>
 ```
 
-Gets an article from the wiki if it exists.
+Prints out an article from the wiki, as long as it exists.
 
 #### List all articles
 
@@ -101,7 +124,7 @@ Gets an article from the wiki if it exists.
 astrawiki list
 ```
 
-Lists all articles in a wiki, pinned, or otherwise.
+Lists all articles in the wiki as a newline separated list.
 
 #### View logs
 
@@ -113,27 +136,162 @@ This command shows the current standard output of the service. To view the
 errors, run:
 
 ```sh
-astrawiki errors
+astrawiki logs -e
 ```
 
-### Docker
+Also, you can follow the logs with the `-f` flag. This acts like `tail -f`.
+
+### Container
 
 Running commands using the containerized version can be done with `docker
-exec`. Simply prepend any command found in the command-line interface with]
+exec`. Simply prepend any command found in the command-line interface with
 `docker exec astrawiki`.
+
+Note that the `file` argument in both `add` and `edit` commands are mandatory,
+since there's no TTY in the container or editor installed.
 
 ### HTTP API
 
 There's a REST API that's in development, but it still works both in the local
-and the Docker versions.
+and the Docker versions after running `astrawiki start`.
 
-It's accesed by `http://localhost:31337`, and supports the following endpoints:
+Available at `http://localhost:31337`, and supports the following
+endpoints:
 
-- Get a list of articles: `GET http://localhost:3133/articles`
+#### Add an article
+
+```http
+POST /articles
+```
+
+This accepts the following body:
+
+```json
+{
+  "name": "<name of the article>",
+  "content": "<content of the article as a raw string>"
+}
+```
+
+On success, the server returns a `201 Created` status code.
+
+#### Get an article
+
+```http
+GET /articles/<name>
+```
+
+This returns the following body:
+
+```json
+{
+  "name": "<name of the article>",
+  "content": "<content of the article as a raw string>"
+}
+```
+
+On success, the server returns a `200 OK` status code.
+
+#### List all articles
+
+```http
+GET /articles
+```
+
+This returns the following body:
+
+```json
+{
+  "articles": [
+    "article1",
+    "article2"
+    // ...
+  ]
+}
+```
+
+On success, the server returns a `200 OK` status code.
+
+#### Get server status
+
+```http
+GET /
+```
+
+This returns a `200 OK` if the server is running.
+
+## Configuration
+
+Flags can handle the configuration, but the user can also set a config file to
+reuse the same configuration upon start.
+
+Path of the config file:
+
+```sh
+~/.config/astrawiki-cli/config.json
+```
+
+It consists of a JSON file with all the configurations needed.
+
+### Example structure
+
+```json
+{
+  "wikiName": "<name of the wiki to open>",
+  "publicIp": "<ipv4 address, must be public>",
+  "isCollaborator": true
+}
+```
+
+The priority of configuration values is the following:
+
+1. Flags
+2. Config file
+3. Defaults
+
+Note that the IP value is mandatory and doesn't have a default value.
+
+## Collaborating
+
+Setting the `--collaborator` flag when starting the service will pin all the
+articles of the wiki you chose. But what does this mean?
+
+Since IPFS is a decentralized service, it needs users hosting the content
+as opposed to servers. If you want to help your favorite wiki, it's useful to
+pin the articles. This means that anytime another user wants to access the
+wiki, they can get the content from you, or any other collaborator. That is, as
+long as you keep the service running in your machine.
 
 ## Development
 
-To work on this you must clone the repository, and run it.
+To work on this you can follow these steps:
+
+```sh
+git clone git@github.com:bitxenia/astrawiki-cli.git
+cd astrawiki-cli
+npm install
+npm run build
+```
+
+This installs the dependencies and builds the JS files.
+
+### Testing
+
+Please make sure you don't have the npm package installed globally first. Just
+in case, you can run:
+
+```sh
+npm remove -g @bitxenia/astrawiki-cli
+```
+
+To test the tool locally, you can run:
+
+```sh
+npm link
+```
+
+This creates a symlink to the built binary, allowing you to run it from
+anywhere using the `astrawiki` command.
 
 ## Limitations
 
