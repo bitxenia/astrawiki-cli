@@ -3,17 +3,20 @@ import os from "os";
 import path from "path";
 import { spawnSync } from "child_process";
 
-export async function getContent(file?: string): Promise<string> {
-  if (file) {
-    return readFile(file, "utf-8");
-  }
-  const tmpFile = path.join(os.tmpdir(), `astrawiki-${Date.now()}.md`);
-  await writeFile(tmpFile, "");
+const DEFAULT_EDITOR = "nano";
 
-  const editor = process.env.EDITOR || "nano";
+export async function getContent(file: string): Promise<string> {
+  return readFile(file, "utf-8");
+}
+
+export async function editContent(content?: string): Promise<string> {
+  const tmpFile = path.join(os.tmpdir(), `astrawiki-${Date.now()}.md`);
+  await writeFile(tmpFile, content ?? "");
+
+  const editor = process.env.EDITOR || DEFAULT_EDITOR;
   spawnSync(editor, [tmpFile], { stdio: "inherit" });
 
-  const content = await readFile(tmpFile, "utf-8");
+  const newContent = await readFile(tmpFile, "utf-8");
   await unlink(tmpFile);
-  return content;
+  return newContent;
 }

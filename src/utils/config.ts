@@ -1,6 +1,8 @@
 import * as fs from "fs/promises";
 import path from "path";
 import os from "os";
+import { mkdir } from "fs/promises";
+import { TMP_DIR } from "./constants.js";
 
 const TMP_CONFIG_PATH = "/tmp/astrawiki-cli/config.json";
 const SAVED_CONFIG_PATH = path.join(
@@ -31,7 +33,7 @@ export async function generateConfig(
   }
 
   checkConfigValidity(finalConfig);
-  writeTmpConfig(finalConfig);
+  await writeTmpConfig(finalConfig);
 }
 
 export async function getTmpConfig() {
@@ -76,5 +78,6 @@ async function readConfig(file: string): Promise<Config> {
 
 async function writeTmpConfig(config: Config): Promise<void> {
   const json = JSON.stringify(config, null, 2);
+  await mkdir(TMP_DIR, { recursive: true });
   await fs.writeFile(TMP_CONFIG_PATH, json, "utf-8");
 }

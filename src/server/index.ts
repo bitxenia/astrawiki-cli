@@ -60,6 +60,18 @@ async function startService() {
     res.json({ name: response.name, content: response.content });
   });
 
+  app.patch("/articles/:name", async (req, res) => {
+    const { content } = req.body;
+    try {
+      await node.editArticle(req.params.name, content);
+      res.json({ message: "Article edited" });
+    } catch {
+      res
+        .status(HttpStatusCode.InternalServerError)
+        .json({ message: "Failed to edit article" });
+    }
+  });
+
   app.post("/articles/", async (req, res) => {
     const { name, content } = req.body;
     await node.newArticle(name, content);

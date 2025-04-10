@@ -1,29 +1,18 @@
 #!/usr/bin/env node
 
-import path, { dirname } from "path";
-import fs from "fs";
 import { program } from "commander";
-import { spawn } from "child_process";
-import { fileURLToPath } from "url";
-import axios, { HttpStatusCode } from "axios";
 import { generateConfig } from "../utils/config.js";
 import { printLog } from "./logs.js";
-import { getContent } from "./content.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const SERVER_FILE = path.resolve(__dirname, "../server/index.js");
-const SERVER_ADDRESS = "http://localhost:31337";
-
-const TMP_DIR = "/tmp/astrawiki-cli";
-const PID_FILE = path.join(TMP_DIR, "astrawiki.pid");
-const LOG_PATH = path.join(TMP_DIR, "out.log");
-const ERROR_PATH = path.join(TMP_DIR, "error.log");
-
-fs.mkdirSync(TMP_DIR, { recursive: true });
-const out = fs.openSync(LOG_PATH, "a");
-const err = fs.openSync(ERROR_PATH, "a");
+import { editContent, getContent } from "./content.js";
+import {
+  addArticle,
+  editArticle,
+  getArticle,
+  getArticleList,
+  isServerRunning,
+} from "./api.js";
+import { isServiceUp, startServer, stopService } from "./service.js";
+import { ERROR_PATH, LOG_PATH } from "../utils/constants.js";
 
 program.name("astrawiki").description("Astrawiki node").version("0.0.1");
 
@@ -36,13 +25,13 @@ program
   .option("-n --name <name>", "Specify the wiki's name to connect to")
   .option("-C --config <path>", "Path of the config to load")
   .action(async (opts) => {
-    if (fs.existsSync(PID_FILE)) {
+    if (await isServiceUp()) {
       console.log("Astrawiki is already running.");
       process.exit(1);
     }
 
     console.log("Starting Astrawiki service...");
-    generateConfig(
+    await generateConfig(
       {
         wikiName: opts.name,
         isCollaborator: opts.collaborator,
@@ -51,55 +40,26 @@ program
       opts.config,
     );
 
-    if (opts.foreground) {
-      fs.writeFileSync(PID_FILE, "");
-      await import("../server/index.js");
-    } else {
-    }
-    const child = spawn(process.execPath, [SERVER_FILE], {
-      detached: true,
-      stdio: ["ignore", out, err],
-    });
-    child.unref();
-
-    const ready = await waitForServer(SERVER_ADDRESS);
-    if (ready) {
-      console.log(`Astrawiki started in the background (PID: ${child.pid})`);
-      fs.writeFileSync(PID_FILE, String(child.pid));
-    } else {
-      console.log("Timed out waiting for service to start");
-      child.kill();
-    }
+    await startServer(opts.foreground);
   });
 
 program
   .command("stop")
   .description("Stop the astrawiki node")
-  .action(() => {
-    if (!fs.existsSync(PID_FILE)) {
+  .action(async () => {
+    if (!(await isServiceUp())) {
       console.log("Astrawiki is not running.");
       return;
     }
-
-    const pid = parseInt(fs.readFileSync(PID_FILE, "utf-8"));
-    try {
-      process.kill(pid);
-      fs.unlinkSync(PID_FILE);
-      console.log(`Astrawiki stopped (PID: ${pid})`);
-    } catch (err) {
-      console.error("Failed to stop Astrawiki:", err);
-      fs.unlinkSync(PID_FILE);
-    }
+    await stopService();
   });
 
 program
   .command("list")
   .description("List the articles in the wiki")
   .action(async () => {
-    const { data } = await axios.get<{ articles: string[] }>(
-      SERVER_ADDRESS + "/articles",
-    );
-    console.log("List of articles:", data.articles);
+    const articles = await getArticleList();
+    console.log(articles.join("\n"));
   });
 
 program
@@ -108,15 +68,28 @@ program
   .argument("<name>", "Name of the article to add")
   .argument("[file]", "File containing article content")
   .action(async (name: string, file?: string) => {
-    const content = await getContent(file);
-    let { status } = await axios.post(SERVER_ADDRESS + "/articles", {
-      name,
-      content,
-    });
-    if (status !== HttpStatusCode.Created) {
-      console.log("Failed to create file");
-    } else {
-      console.log(`Article ${name} created`);
+    const content = file ? await getContent(file) : await editContent();
+    try {
+      await addArticle(name, content);
+      console.log(`Article ${name} added`);
+    } catch {
+      console.log("Failed to add article");
+    }
+  });
+
+program
+  .command("edit")
+  .description("Edit an article")
+  .argument("<name>", "Name of the article to edit")
+  .argument("[file]", "File containing updated article content")
+  .action(async (name: string, file?: string) => {
+    const { content } = await getArticle(name);
+    let newContent = file ? await getContent(file) : await editContent(content);
+    try {
+      await editArticle(name, newContent);
+      console.log(`Article ${name} edited`);
+    } catch {
+      console.log("Failed to edit file");
     }
   });
 
@@ -125,10 +98,8 @@ program
   .description("Get an article")
   .argument("<name>", "Name of the article to get")
   .action(async (name: string) => {
-    const { data } = await axios.get<{ name: string; content: string }>(
-      SERVER_ADDRESS + `/articles/${name}`,
-    );
-    console.log(data.content);
+    const { content } = await getArticle(name);
+    console.log(content);
   });
 
 program
@@ -145,25 +116,13 @@ program
   .command("status")
   .description("Display the Astrawiki service status")
   .action(async () => {
-    try {
-      await axios.get(SERVER_ADDRESS);
+    if (await isServerRunning()) {
       console.log("Astrawiki service is running");
-    } catch {
-      console.log("Astrawiki service isn't running, check the errors");
+    } else {
+      console.log(
+        "Astrawiki service isn't running, check the errors using astrawiki logs -e",
+      );
     }
   });
-
-async function waitForServer(url: string, timeout = 60000): Promise<boolean> {
-  const start = Date.now();
-  while (Date.now() - start < timeout) {
-    try {
-      await axios.get(url);
-      return true;
-    } catch {
-      await new Promise((res) => setTimeout(res, 300));
-    }
-  }
-  return false;
-}
 
 program.parse(process.argv);
