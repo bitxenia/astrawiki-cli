@@ -27,4 +27,4 @@ EXPOSE 4002
 EXPOSE 4003
 
 RUN npm link
-CMD ["astrawiki", "start", "--foreground"]
+CMD ["astrawiki", "start", "--foreground", "--config", "/usr/local/bin/share/config/config.json"]

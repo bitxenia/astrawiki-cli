@@ -7,3 +7,5 @@ services:
       - "4002:4002"
       - "4003:4003"
       - "31337:31337"
+    volumes:
+      - ./config:/usr/local/bin/share/config/

@@ -2,7 +2,8 @@
 
 This is a command-line interface to interact and manage an astrawiki-ipfs node.
 It runs a background service that can be used to help pin a given wiki's
-articles.
+articles. But it can also act as a frontend for fetching, updating, and
+creating articles in a wiki.
 
 ## Motivation
 
@@ -27,7 +28,7 @@ specifically [OrbitDB](https://orbitdb.org).
 
 ## Dependencies
 
-- `npm`: for installing it.
+- `npm`: for the installation.
 
 ## Install
 
@@ -39,13 +40,20 @@ Docker container.
 To install it locally, run:
 
 ```sh
-npm install -g astrawiki-cli
+npm install -g @bitxenia/astrawiki-cli
 ```
 
 ## Docker
 
-For this version, you'll need both Docker abd Docker Compose installed. To run
+For this version, you'll need both Docker and Docker Compose installed. To run
 the container, clone the repo and run:
+
+```sh
+mkdir config
+```
+
+Then inside the config directory, you can place a config.json file for the
+Docker container to run. After that, run:
 
 ```sh
 docker compose up

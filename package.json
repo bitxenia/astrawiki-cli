@@ -1,5 +1,5 @@
 {
-  "name": "astrawiki-cli",
+  "name": "@bitxenia/astrawiki-cli",
   "version": "0.0.1",
   "main": "dist/index.js",
   "scripts": {
