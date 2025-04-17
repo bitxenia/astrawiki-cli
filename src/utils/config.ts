@@ -23,6 +23,8 @@ export async function generateConfig(
   let finalConfig: Config = defaultConfig;
 
   const savedFile = file ?? SAVED_CONFIG_PATH;
+  const envConfig = getEnvConfig();
+  finalConfig = overwriteConfig(finalConfig, envConfig);
   if (await isFileValid(savedFile)) {
     const savedConfig = await readConfig(savedFile);
     finalConfig = overwriteConfig(finalConfig, savedConfig);
@@ -64,6 +66,14 @@ function overwriteConfig(lowPriority: Config, highPriority: Config): Config {
     isCollaborator: highPriority.isCollaborator
       ? highPriority.isCollaborator
       : lowPriority.isCollaborator,
+  };
+}
+
+function getEnvConfig(): Config {
+  return {
+    wikiName: process.env.ASTRAWIKI_WIKI_NAME ?? undefined,
+    publicIp: process.env.ASTRAWIKI_PUBLIC_IP ?? undefined,
+    isCollaborator: process.env.ASTRAWIKI_IS_COLLABORATOR !== undefined,
   };
 }
 

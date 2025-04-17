@@ -22,9 +22,12 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 
-EXPOSE 4001
-EXPOSE 4002
-EXPOSE 4003
+# Astrawiki ports
+EXPOSE 40001
+EXPOSE 40002
+EXPOSE 40003
+# Astrawiki CLI server port
+EXPOSE 31337
 
 RUN npm link
-CMD ["astrawiki", "start", "--foreground", "--config", "/usr/local/bin/share/config/config.json"]
+CMD ["astrawiki", "start", "--foreground"]

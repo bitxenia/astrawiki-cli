@@ -71,8 +71,8 @@ docker compose down
 
 ### Ports
 
-For the tool to work as intended, it's necessary to open the ports `4001`,
-`4002` and `4003` to your machine. This is the same for containers and local
+For the tool to work as intended, it's necessary to open the ports `40001`,
+`40002` and `40003` to your machine. This is the same for containers and local
 installs, and enables the IPFS node to communicate with other peers.
 
 ## Quick start
@@ -146,8 +146,26 @@ Also, you can follow the logs with the `-f` flag. This acts like `tail -f`.
 
 ### Container
 
-Note that the `file` argument in both `add` and `edit` commands are mandatory,
-since there's no TTY in the container or editor installed.
+#### Start the service
+
+You can run the following command to build the container:
+
+```sh
+docker build -t bitxenia/astrawiki-cli:local .
+```
+
+Then, to run it, run the following:
+
+```sh
+docker run -p 40001:40001 -p 40002:40002 -p 40003:40003 \
+  -e ASTRAWIKI_WIKI_NAME="bitxenia-wiki" \
+  -e ASTRAWIKI_PUBLIC_IP="0.0.0.0" \
+  -e ASTRAWIKI_IS_COLLABORATOR="" \
+  bitxenia/astrawiki-cli:local
+```
+
+Make sure to replace the `ASTRAWIKI_PUBLIC_IP` environment variable to your
+actual IPv4 address.
 
 #### Add an article
 

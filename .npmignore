@@ -1,7 +1,6 @@
 /src
 /node_modules
 /orbitdb
-/config
 
 docker-compose.yml
 Dockerfile
