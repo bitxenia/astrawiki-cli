@@ -46,27 +46,10 @@ And then run `astrawiki -V` to check the installation was successful.
 
 ### Docker
 
-For this version, you'll need both Docker and Docker Compose installed. To run
-the container, run:
+There's a DockerHub Docker image available. To get the image, run:
 
 ```sh
-git clone git@github.com:bitxenia/astrawiki-cli.git
-cd astrawiki-cli
-mkdir config
-cp ./config.example.json ./config/config.json
-```
-
-Then open the `config/config.json` file and add your public IP to the file.
-After that, you can run:
-
-```sh
-docker compose up
-```
-
-Similarly, to stop the container, you can run:
-
-```sh
-docker compose down
+docker pull bitxenia/astrawiki-cli:latest
 ```
 
 ### Ports
@@ -148,20 +131,14 @@ Also, you can follow the logs with the `-f` flag. This acts like `tail -f`.
 
 #### Start the service
 
-You can run the following command to build the container:
-
-```sh
-docker build -t bitxenia/astrawiki-cli:local .
-```
-
-Then, to run it, run the following:
+To start the service, run the following:
 
 ```sh
 docker run -p 40001:40001 -p 40002:40002 -p 40003:40003 \
   -e ASTRAWIKI_WIKI_NAME="bitxenia-wiki" \
   -e ASTRAWIKI_PUBLIC_IP="0.0.0.0" \
   -e ASTRAWIKI_IS_COLLABORATOR="" \
-  bitxenia/astrawiki-cli:local
+  bitxenia/astrawiki-cli:latest
 ```
 
 Make sure to replace the `ASTRAWIKI_PUBLIC_IP` environment variable to your

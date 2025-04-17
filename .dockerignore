@@ -1,0 +1,10 @@
+/node_modules
+/dist
+/orbitdb
+*.log
+.git
+.gitignore
+.npmignore
+Dockerfile
+.env
+config.example.json
