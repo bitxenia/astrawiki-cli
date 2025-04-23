@@ -16,7 +16,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@bitxenia/astrawiki": "^0.0.20",
+    "@bitxenia/astrawiki": "^0.0.21",
     "axios": "^1.8.4",
     "blockstore-fs": "^2.0.2",
     "chalk": "^5.4.1",
