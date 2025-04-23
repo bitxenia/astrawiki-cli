@@ -1,7 +1,7 @@
 {
   "name": "@bitxenia/astrawiki-cli",
   "description": "Command-line interface to manage an Astrawiki node.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -16,7 +16,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@bitxenia/astrawiki": "^0.0.19",
+    "@bitxenia/astrawiki": "^0.0.20",
     "axios": "^1.8.4",
     "blockstore-fs": "^2.0.2",
     "chalk": "^5.4.1",
