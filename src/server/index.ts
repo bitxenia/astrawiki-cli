@@ -6,22 +6,11 @@ import {
 } from "@bitxenia/astrawiki";
 import { FsBlockstore } from "blockstore-fs";
 import { FsDatastore } from "datastore-fs";
-import { fileURLToPath } from "url";
-import path, { dirname } from "path";
 import { getTmpConfig } from "../utils/config.js";
 import { HttpStatusCode } from "axios";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const BLOCKSTORE_DIR = path.resolve(
-  __dirname,
-  "./astrawiki_data/ipfs/block-store",
-);
-const DATASTORE_DIR = path.resolve(
-  __dirname,
-  "./astrawiki_data/ipfs/data-store",
-);
+const BLOCKSTORE_DIR = "./astrawiki_data/ipfs/block-store";
+const DATASTORE_DIR = "./astrawiki_data/ipfs/data-store";
 
 const PORT = 31337;
 

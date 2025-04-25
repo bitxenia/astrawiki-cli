@@ -1,7 +1,7 @@
 {
   "name": "@bitxenia/astrawiki-cli",
   "description": "Command-line interface to manage an Astrawiki node.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
