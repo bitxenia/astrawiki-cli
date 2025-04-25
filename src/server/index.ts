@@ -9,8 +9,9 @@ import { FsDatastore } from "datastore-fs";
 import { getTmpConfig } from "../utils/config.js";
 import { HttpStatusCode } from "axios";
 
-const BLOCKSTORE_DIR = "./astrawiki_data/ipfs/block-store";
-const DATASTORE_DIR = "./astrawiki_data/ipfs/data-store";
+// Save the blockstore and datastore in the root directory
+const BLOCKSTORE_DIR = "../../astrawiki_data/ipfs/block-store";
+const DATASTORE_DIR = "../../astrawiki_data/ipfs/data-store";
 
 const PORT = 31337;
 
