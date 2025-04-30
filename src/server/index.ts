@@ -1,34 +1,30 @@
 import express, { Request, Response, NextFunction } from "express";
-import {
-  createAstrawikiNode,
-  AstrawikiNode,
-  AstrawikiNodeInit,
-} from "@bitxenia/astrawiki";
+import { createAstrawiki, Astrawiki, AstrawikiInit } from "@bitxenia/astrawiki";
 import { FsBlockstore } from "blockstore-fs";
 import { FsDatastore } from "datastore-fs";
 import { getTmpConfig } from "../utils/config.js";
 import { HttpStatusCode } from "axios";
 
 // Save the blockstore and datastore in the root directory
-const BLOCKSTORE_DIR = "./astrawiki_data/ipfs/block-store";
-const DATASTORE_DIR = "./astrawiki_data/ipfs/data-store";
+const BLOCKSTORE_DIR = "./data/astrawiki/block-store";
+const DATASTORE_DIR = "./data/astrawiki/data-store";
 
 const PORT = 31337;
 
-let node: AstrawikiNode | null = null;
+let node: Astrawiki | null = null;
 
 async function startService() {
   const config = await getTmpConfig();
   const app = express();
-  const opts: AstrawikiNodeInit = {
+  const opts: AstrawikiInit = {
     blockstore: new FsBlockstore(BLOCKSTORE_DIR),
     datastore: new FsDatastore(DATASTORE_DIR),
     isCollaborator: config.isCollaborator,
-    publicIP: config.publicIp,
+    publicIp: config.publicIp,
     wikiName: config.wikiName,
   };
 
-  node = await createAstrawikiNode(opts);
+  node = await createAstrawiki(opts);
   app.use(express.json());
 
   app.use((_req: Request, res: Response, next: NextFunction): void => {
