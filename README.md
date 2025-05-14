@@ -54,8 +54,8 @@ docker pull bitxenia/astrawiki-cli:latest
 
 ### Ports
 
-For the tool to work as intended, it's necessary to open the ports `40001`,
-`40002` and `40003` to your machine. This is the same for containers and local
+For the tool to work as intended, it's necessary to open the ports TCP `40001`,
+TCP `40002`, TCP `40003` and UDP `40001` to your machine. This is the same for containers and local
 installs, and enables the IPFS node to communicate with other peers.
 
 ## Quick start
@@ -134,7 +134,7 @@ Also, you can follow the logs with the `-f` flag. This acts like `tail -f`.
 To start the service, run the following:
 
 ```sh
-docker run -p 40001:40001 -p 40002:40002 -p 40003:40003 \
+docker run -p 40001:40001 -p 40002:40002 -p 40003:40003 -p 40001:40001/udp \
   -e ASTRAWIKI_WIKI_NAME="bitxenia-wiki" \
   -e ASTRAWIKI_PUBLIC_IP="0.0.0.0" \
   -e ASTRAWIKI_IS_COLLABORATOR="" \
