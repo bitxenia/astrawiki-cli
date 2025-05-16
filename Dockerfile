@@ -24,8 +24,6 @@ COPY --from=builder /app/node_modules ./node_modules
 
 # Astrawiki ports
 EXPOSE 40001
-EXPOSE 40002
-EXPOSE 40003
 EXPOSE 40001/udp
 # Astrawiki CLI server port
 EXPOSE 31337
