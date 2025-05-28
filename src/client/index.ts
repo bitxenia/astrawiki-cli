@@ -11,7 +11,7 @@ import {
   getArticleList,
   isServerRunning,
 } from "./api.js";
-import { isServiceUp, startServer, stopService } from "./service.js";
+import { killServiceIfUp, startServer } from "./service.js";
 import { ERROR_PATH, LOG_PATH } from "../utils/constants.js";
 import chalk from "chalk";
 import { log } from "../utils/logger.js";
@@ -28,10 +28,7 @@ program
   .option("-n --name <name>", "Specify the wiki's name to connect to")
   .option("-C --config <path>", "Path of the config to load")
   .action(async (opts) => {
-    if (await isServiceUp()) {
-      log.info(`${chalk.bold("Astrawiki")} service is already running`);
-      process.exit(1);
-    }
+    killServiceIfUp();
 
     const spinner = ora({
       text: `    Starting ${chalk.bold("Astrawiki")} service`,
@@ -55,11 +52,7 @@ program
   .command("stop")
   .description("Stop the astrawiki node")
   .action(async () => {
-    if (!(await isServiceUp())) {
-      log.info("Astrawiki service is not running.");
-      return;
-    }
-    await stopService();
+    killServiceIfUp();
     log.success(`${chalk.bold("Astrawiki")} service stopped`);
   });
 

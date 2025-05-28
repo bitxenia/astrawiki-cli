@@ -1,6 +1,6 @@
 import path from "path";
 import { access, writeFile, readFile, unlink } from "fs/promises";
-import fs, { openSync } from "fs";
+import fs, { openSync, readFileSync } from "fs";
 import { spawn } from "child_process";
 import { isServerRunning } from "./api.js";
 import {
@@ -37,21 +37,12 @@ export async function startServer(foreground: boolean) {
   }
 }
 
-export async function stopService(): Promise<void> {
-  const pid = parseInt(await readFile(PID_FILE, "utf-8"));
-  await unlink(PID_FILE);
+export function killServiceIfUp(): void {
   try {
+    const pidStr = readFileSync(PID_FILE, "utf-8");
+    const pid = parseInt(pidStr.trim(), 10);
     process.kill(pid);
-  } catch (err) {}
-}
-
-export async function isServiceUp(): Promise<boolean> {
-  try {
-    await access(PID_FILE);
-    return true;
-  } catch {
-    return false;
-  }
+  } catch {}
 }
 
 async function waitForServer(timeout = 60000): Promise<boolean> {
